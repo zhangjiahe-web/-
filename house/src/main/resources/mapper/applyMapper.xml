@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.kgc.zhang.mapper.applyMapper" >
+  <resultMap id="BaseResultMap" type="com.kgc.zhang.entity.apply" >
+    <id column="apply_id" property="applyId" jdbcType="INTEGER" />
+    <id column="house_id" property="houseId" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="area" property="area" jdbcType="DOUBLE" />
+    <result column="price" property="price" jdbcType="DOUBLE" />
+    <result column="status" property="status" jdbcType="VARCHAR" />
+    <result column="userlist_id" property="userlistId" jdbcType="INTEGER" />
+    <!--房东查看自己的房子申请-->
+    <!-- houserlist.id==apply.house_id   apply.userlist_id==userlist.user_id-->
+    <association property="userlist" javaType="com.kgc.zhang.entity.userlist">
+      <id column="id" property="id"/>
+      <result column="name" property="name" jdbcType="VARCHAR" />
+      <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+      <result column="phone" property="phone" jdbcType="VARCHAR" />
+      <result column="id" property="id" jdbcType="INTEGER" />
+    </association>
+      <association property="houselist" javaType="com.kgc.zhang.entity.houselist">
+          <id column="id" property="id"/>
+          <result column="id" property="id"  />
+          <result column="houseid" property="houseid"  />
+          <result column="address" property="address"  />
+          <result column="status" property="status"  />
+          <result column="img" property="img"  />
+          <result column="introduce" property="introduce"  />
+          <result column="landlady" property="landlady"  />
+      </association>
+  </resultMap>
+  <!---->
+  <select id="findapplylist" resultMap="BaseResultMap">
+        SELECT
+    apply.*
+    , houselist.*
+    , userlist.*
+    , user.*
+FROM
+    zu.apply
+    INNER JOIN zu.userlist
+        ON (apply.userlist_id = userlist.id)
+    INNER JOIN zu.houselist
+        ON (apply.house_id = houselist.houseid)
+    INNER JOIN zu.user
+        ON (userlist.user_id = user.id) where houselist.landlady=#{username} AND apply.status='申请中';
+  </select>
+
+  <sql id="Base_Column_List2" >
+    apply_id, house_id, address, area, price, status, userlist_id,name,idcard,phone
+  </sql>
+  <select id="selectapplyanduserlist" resultMap="BaseResultMap" parameterType="com.kgc.zhang.entity.applyExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List2" />
+    from applyanduserlist
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <!---->
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    apply_id, house_id, address, area, price, status, userlist_id
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.kgc.zhang.entity.applyExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from apply
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="com.kgc.zhang.entity.applyKey" >
+    select 
+    <include refid="Base_Column_List" />
+    from apply
+    where apply_id = #{applyId,jdbcType=INTEGER}
+      and house_id = #{houseId,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="com.kgc.zhang.entity.applyKey" >
+    delete from apply
+    where apply_id = #{applyId,jdbcType=INTEGER}
+      and house_id = #{houseId,jdbcType=VARCHAR}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.kgc.zhang.entity.applyExample" >
+    delete from apply
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.kgc.zhang.entity.apply" >
+    insert into apply (apply_id, house_id, address, 
+      area, price, status, 
+      userlist_id)
+    values (#{applyId,jdbcType=INTEGER}, #{houseId,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, 
+      #{area,jdbcType=DOUBLE}, #{price,jdbcType=DOUBLE}, #{status,jdbcType=VARCHAR}, 
+      #{userlistId,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.kgc.zhang.entity.apply" >
+    insert into apply
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="applyId != null" >
+        apply_id,
+      </if>
+      <if test="houseId != null" >
+        house_id,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="area != null" >
+        area,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="userlistId != null" >
+        userlist_id,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="applyId != null" >
+        #{applyId,jdbcType=INTEGER},
+      </if>
+      <if test="houseId != null" >
+        #{houseId,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="area != null" >
+        #{area,jdbcType=DOUBLE},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=DOUBLE},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="userlistId != null" >
+        #{userlistId,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.kgc.zhang.entity.applyExample" resultType="java.lang.Integer" >
+    select count(*) from apply
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update apply
+    <set >
+      <if test="record.applyId != null" >
+        apply_id = #{record.applyId,jdbcType=INTEGER},
+      </if>
+      <if test="record.houseId != null" >
+        house_id = #{record.houseId,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null" >
+        address = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.area != null" >
+        area = #{record.area,jdbcType=DOUBLE},
+      </if>
+      <if test="record.price != null" >
+        price = #{record.price,jdbcType=DOUBLE},
+      </if>
+      <if test="record.status != null" >
+        status = #{record.status,jdbcType=VARCHAR},
+      </if>
+      <if test="record.userlistId != null" >
+        userlist_id = #{record.userlistId,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update apply
+    set apply_id = #{record.applyId,jdbcType=INTEGER},
+      house_id = #{record.houseId,jdbcType=VARCHAR},
+      address = #{record.address,jdbcType=VARCHAR},
+      area = #{record.area,jdbcType=DOUBLE},
+      price = #{record.price,jdbcType=DOUBLE},
+      status = #{record.status,jdbcType=VARCHAR},
+      userlist_id = #{record.userlistId,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.kgc.zhang.entity.apply" >
+    update apply
+    <set >
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="area != null" >
+        area = #{area,jdbcType=DOUBLE},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=DOUBLE},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=VARCHAR},
+      </if>
+      <if test="userlistId != null" >
+        userlist_id = #{userlistId,jdbcType=INTEGER},
+      </if>
+    </set>
+    where apply_id = #{applyId,jdbcType=INTEGER}
+      and house_id = #{houseId,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.kgc.zhang.entity.apply" >
+    update apply
+    set address = #{address,jdbcType=VARCHAR},
+      area = #{area,jdbcType=DOUBLE},
+      price = #{price,jdbcType=DOUBLE},
+      status = #{status,jdbcType=VARCHAR},
+      userlist_id = #{userlistId,jdbcType=INTEGER}
+    where apply_id = #{applyId,jdbcType=INTEGER}
+      and house_id = #{houseId,jdbcType=VARCHAR}
+  </update>
+</mapper>
